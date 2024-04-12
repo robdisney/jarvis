@@ -26,6 +26,25 @@ def extract_python(response_content):
         return 'satisfied'
     else:
         return None
+    
+# Define the function to extract any "pip install" statement from chatgpt response and then install via subprocess before attempting running python script.
+def handle_pip_install(response_content):
+    # Define the regular expression pattern for extracting pip install commands
+    pattern = r"pip install (.*?)\n"
+    match = re.search(pattern, response_content, re.DOTALL)
+    if match:
+        # Extract the command, remove leading/trailing whitespace, and return
+        command = match.group(1).strip()
+        print(f"Executing '''bash\n{command}\n'''")
+        # Use subprocess to execute the command
+        process = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
+        # Fetch the output and errors, if any
+        output, error = process.communicate()
+        # Print the command's output
+        print('Output:', output.decode())
+        # Print the command's error
+        if error:
+            print('Error:', error.decode())
 
 # Define the function to generate a response from the AI
 def generate_response(prompt):
@@ -75,6 +94,10 @@ def main_loop():
         prompt = original_prompt if version == 1 else combined_prompt
         print(f'sending prompt to chatgpt iteration {version}')
         response = generate_response(prompt)
+        print(f"ChatGPT's response for iteration {version} is: \n", response)
+
+        # Handle pip install commands in the response
+        handle_pip_install(response)
 
         # Check if AI is satisfied or if there's a Python script to extract
         extracted_code = extract_python(response)
@@ -103,9 +126,7 @@ def main_loop():
             print(f"Script version {version} executed. Check {result_filename} for the output.")
 
         # Prepare the prompt for the next iteration
-        #previous_script = Path(script_filename).read_text()
-        #previous_result = Path(result_filename).read_text()
-        combined_prompt = f"You were asked: {original_prompt}\n\n# and produced this script:\n{extracted_code}\n\n# which produced these Results:\n{execution_outcome}\n\nBased on what you were asked to do, the script you wrote, and its results, are you satisfied? If yes, return only the word 'satisfied'. If no, revise the script to achieve the desired results. in your response, return the entire revised script"
+        combined_prompt = f"You were asked: {original_prompt}\n\n# and produced this script:\n{extracted_code}\n\n# which produced these Results:\n{execution_outcome}\n\nBased on what you were asked to do, the script you wrote, and its results, are you satisfied? If yes, return only the word 'satisfied'. If no, revise the script to achieve the desired results. in your response, return the entire revised script.  If you specify any required libaries that need to be installed for the code to work, include a single command to install them."
         print(f"Sending the following prompt to AI:\n{combined_prompt}")
 
         version += 1
