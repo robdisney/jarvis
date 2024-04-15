@@ -12,6 +12,15 @@ import re
 
 client = OpenAI(api_key="<your_key_here>")
 
+# Function to check and create directory if not exists
+def check_and_create_dir(dir_name):
+    if not os.path.exists(dir_name):
+        os.makedirs(dir_name)
+
+# Call the function for 'scripts' and 'results' directories
+check_and_create_dir('scripts')
+check_and_create_dir('results')
+
 # Define function to extract python code from responses
 def extract_python(response_content):
     # Define the regular expression pattern for extracting Python code blocks
