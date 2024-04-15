@@ -65,7 +65,7 @@ def generate_response(prompt):
 
 # Function to read the latest prompt and append the additional phrase
 def read_latest_prompt():
-    prompt_content = Path('prompts/prompt.txt').read_text('utf-8')
+    prompt_content = Path('jprompt.txt').read_text('utf-8')
     additional_phrase = "\nReturn your response as a complete python script. The code you return must be a complete solution. Ensure that if you use print statements, they are not commented out, regardless of the original prompt request."
     return f"{prompt_content}{additional_phrase}"
 
