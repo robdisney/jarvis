@@ -3,9 +3,9 @@
 Jarvis is an application orchestrating the automation of code writing, execution, revision, and optimization through the integration of generative ai.  If using Jarvis with Azure openAI services, it requires a secondary document called "openaicreds.py" (not included) that contains the secrets required to connect to your instance of chatgpt in Azure.  Here, I am using Azure OpenAI services, but you can use openai api instead if you like (see comments in script for walkthrough).
 
 Create a folder with the documents shown below:  
-Jarvis_folder
-jarvis.py
-openaicreds.py
+Jarvis_folder \n
+jarvis.py \n
+openaicreds.py \n
 jprompt.txt
 
 1. run "pip install openai" in a terminal either globally or in a virtual environment of your choice (i.e. conda, virtualenv, etc)
