@@ -1,3 +1,5 @@
+""" Use this version if using api key from OpenAI """
+
 # jarvis.py
 
 # Import libraries
@@ -5,13 +7,10 @@ import subprocess
 import os
 from datetime import datetime
 from pathlib import Path
-from openai import AzureOpenAI # If using OpenAI API Key instead, change this line to "import openai"
+import openai
 import re
-from openaicreds import openaiapi_version, openaiapi_base, openaiapi_key, model # If using OpenAI API Key, delete or comment this
 
-client = AzureOpenAI(api_version=openaiapi_version,
-                     azure_endpoint=openaiapi_base,
-                     api_key=openaiapi_key) #  If using OpenAI API Key, change this to "client = OpenAI(api_key="<your_key_here>")
+client = OpenAI(api_key="<your_key_here>")
 
 # Define function to extract python code from responses
 def extract_python(response_content):
@@ -50,9 +49,9 @@ def handle_pip_install(response_content):
 # Define the function to generate a response from the AI
 def generate_response(prompt):
     response = client.chat.completions.create(messages=[{"role": "user", "content": prompt}],
-                                              model=model,
+                                              model="gpt-4-1106-preview", # CHANGE MODEL TO SUIT YOUR NEEDS
                                               max_tokens=4000,
-                                              temperature=0.75)  ### If using OpenAI API Key, change model to 'model = "gpt-4-1106-preview"' or your preferred model ###
+                                              temperature=0.75)
     return response.choices[0].message.content
 
 # Function to read the latest prompt and append the additional phrase
