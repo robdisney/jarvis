@@ -35,6 +35,7 @@ def handle_pip_install(response_content):
     if match:
         # Extract the command, remove leading/trailing whitespace, and return
         command = match.group(1).strip()
+        command = "pip install " + command
         print(f"Executing '''bash\n{command}\n'''")
         # Use subprocess to execute the command
         process = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
@@ -126,7 +127,7 @@ def main_loop():
             print(f"Script version {version} executed. Check {result_filename} for the output.")
 
         # Prepare the prompt for the next iteration
-        combined_prompt = f"You were asked: {original_prompt}\n\n# and produced this script:\n{extracted_code}\n\n# which produced these Results:\n{execution_outcome}\n\nBased on what you were asked to do, the script you wrote, and its results, are you satisfied? If yes, return only the word 'satisfied'. If no, revise the script to achieve the desired results. in your response, return the entire revised script.  If your code requires any libaries to be installed for the code to work, include a single 'pip install' command to help me install them."
+        combined_prompt = f"You were asked: {original_prompt}\n\n# and produced this script:\n{extracted_code}\n\n# which produced these Results:\n{execution_outcome}\n\nBased on what you were asked to do, the script you wrote, and its results, are you satisfied? If yes, return only the word 'satisfied'. If no, revise the script to achieve the desired results. in your response, return the entire revised script.  If your code requires any libaries that need to be installed for the code to work, include a single 'pip install' command to install them."
         print(f"Sending the following prompt to AI:\n{combined_prompt}")
 
         version += 1
