@@ -5,13 +5,13 @@ import subprocess
 import os
 from datetime import datetime
 from pathlib import Path
-from openai import AzureOpenAI
+from openai import AzureOpenAI # If using OpenAI API Key instead, change this line to "import openai"
 import re
-from openaicreds import openaiapi_version, openaiapi_base, openaiapi_key, model
+from openaicreds import openaiapi_version, openaiapi_base, openaiapi_key, model # If using OpenAI API Key, delete or comment this
 
 client = AzureOpenAI(api_version=openaiapi_version,
                      azure_endpoint=openaiapi_base,
-                     api_key=openaiapi_key)
+                     api_key=openaiapi_key) #  If using OpenAI API Key, change this to "client = OpenAI(api_key="<your_key_here>")
 
 # Define function to extract python code from responses
 def extract_python(response_content):
@@ -52,7 +52,7 @@ def generate_response(prompt):
     response = client.chat.completions.create(messages=[{"role": "user", "content": prompt}],
                                               model=model,
                                               max_tokens=4000,
-                                              temperature=0.75)
+                                              temperature=0.75)  ### If using OpenAI API Key, change model to 'model = "gpt-4-1106-preview"' or your preferred model ###
     return response.choices[0].message.content
 
 # Function to read the latest prompt and append the additional phrase
