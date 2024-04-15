@@ -4,9 +4,9 @@ Jarvis is an application orchestrating the automation of code writing, execution
 
 Create a folder with the documents shown below:  
 Jarvis_folder
-  jarvis.py
-  openaicreds.py
-  jprompt.txt
+jarvis.py
+openaicreds.py
+jprompt.txt
 
 1. run "pip install openai" in a terminal either globally or in a virtual environment of your choice (i.e. conda, virtualenv, etc)
 2. Place your prompt request for python code in the "jprompt.txt" document.
