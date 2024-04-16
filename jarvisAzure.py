@@ -9,16 +9,28 @@ from datetime import datetime
 from pathlib import Path
 from openai import AzureOpenAI
 import re
+import shutil
 from openaicreds import openaiapi_version, openaiapi_base, openaiapi_key, model
 
 client = AzureOpenAI(api_version=openaiapi_version,
                      azure_endpoint=openaiapi_base,
                      api_key=openaiapi_key)
 
-# Function to check and create directory if not exists
+# Function to check and create directory if not exists, and clear it if it does
 def check_and_create_dir(dir_name):
     if not os.path.exists(dir_name):
         os.makedirs(dir_name)
+    else:
+        # If the directory exists, clear its contents
+        for filename in os.listdir(dir_name):
+            file_path = os.path.join(dir_name, filename)
+            try:
+                if os.path.isfile(file_path) or os.path.islink(file_path):
+                    os.unlink(file_path)
+                elif os.path.isdir(file_path):
+                    shutil.rmtree(file_path)
+            except Exception as e:
+                print(f'Failed to delete {file_path}. Reason: {e}')
 
 # Call the function for 'scripts' and 'results' directories
 check_and_create_dir('scripts')
