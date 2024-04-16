@@ -1,7 +1,3 @@
-""" Use this version if you are using ChatGPT from Azure OpenAI Services """
-
-# jarvis.py
-
 # Import libraries
 import subprocess
 import os
@@ -32,9 +28,18 @@ def check_and_create_dir(dir_name):
             except Exception as e:
                 print(f'Failed to delete {file_path}. Reason: {e}')
 
+# Function to check and create directory if not exists for scripts
+def check_and_create_dir_scripts(dir_name):
+    if not os.path.exists(dir_name):
+        os.makedirs(dir_name)
+
 # Call the function for 'scripts' and 'results' directories
-check_and_create_dir('scripts')
+check_and_create_dir('drafts')
 check_and_create_dir('results')
+check_and_create_dir_scripts('scripts')
+
+# Initialize lists to store the drafts and results
+drafts_and_results_list = []
 
 # Define function to extract python code from responses
 def extract_python(response_content):
@@ -73,9 +78,9 @@ def handle_pip_install(response_content):
 # Define the function to generate a response from the AI
 def generate_response(prompt):
     response = client.chat.completions.create(messages=[{"role": "user", "content": prompt}],
-                                              model=model,
+                                              model=model, # CHANGE MODEL TO SUIT YOUR NEEDS
                                               max_tokens=4000,
-                                              temperature=0.75) 
+                                              temperature=0.75)
     return response.choices[0].message.content
 
 # Function to read the latest prompt and append the additional phrase
@@ -85,8 +90,8 @@ def read_latest_prompt():
     return f"{prompt_content}{additional_phrase}"
 
 # Function to write the Python script to a file
-def write_script_to_file(script, version):
-    filename = f'scripts/script_v{version}.py'
+def write_draft_to_file(script, version):
+    filename = f'drafts/draft_v{version}.py'
     with open(filename, 'w') as file:
         file.write(script)
     return filename
@@ -106,6 +111,13 @@ def write_result_to_file(output):
     filename = f'results/results_{timestamp}.txt'
     with open(filename, 'w') as file:
         file.write(output)
+    return filename, timestamp
+
+def write_final_version_to_file(script):
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    filename = f'scripts/script_{timestamp}.py'
+    with open(filename, 'w') as file:
+        file.write(script)
     return filename, timestamp
 
 # Main loop for generating, executing, and validating the script
@@ -128,13 +140,14 @@ def main_loop():
         print('extracted code:\n', extracted_code)
         if extracted_code == 'satisfied':
             print("AI is satisfied with the script.")
+            final_version=write_final_version_to_file(most_recent_version)
             break
         elif extracted_code is None:
             print("No Python script found in AI response.")
             continue  # Continue to the next iteration instead of breaking
 
         # Write the new script version
-        script_filename = write_script_to_file(extracted_code, version)
+        script_filename = write_draft_to_file(extracted_code, version)
         print(f"Script version {version} written to {script_filename}.")
 
         # Execute the new script version
@@ -149,10 +162,16 @@ def main_loop():
             result_filename, _ = write_result_to_file(output)
             print(f"Script version {version} executed. Check {result_filename} for the output.")
 
+        # Append the script and result to their respective lists
+        current_version = script_filename + "\n" + extracted_code + "\n" + result_filename + "\n" + str(execution_outcome)
+        drafts_and_results_list.append(current_version)
+        print("### drafts_and_results_list:\n\n", drafts_and_results_list)
+        #last_three_drafts_and_results = "\n".join(drafts_and_results_list[-3:])
+        #print("### last_three_drafts_and_results: \n\n" + last_three_drafts_and_results)
         # Prepare the prompt for the next iteration
-        combined_prompt = f"You were asked: {original_prompt}\n\n# and produced this script:\n{extracted_code}\n\n# which produced these Results:\n{execution_outcome}\n\nBased on what you were asked to do, the script you wrote, and its results, are you satisfied? If yes, return only the word 'satisfied'. If no, revise the script to achieve the desired results. in your response, return the entire revised script.  If your code requires any libaries that need to be installed for the code to work, include a single 'pip install' command to install them."
+        combined_prompt = f"You were asked: {original_prompt}\n\n# and produced these scripts and their respective results:\n{drafts_and_results_list[-3:]}\n\nBased on what you were asked to do, the scripts you wrote, and their results, are you satisfied? If yes, return only the word 'satisfied'. If no, revise the script to achieve the desired results. in your response, return the entire revised script.  If your code requires any libaries that need to be installed for the code to work, include a single 'pip install' command to install them."
         print(f"Sending the following prompt to AI:\n{combined_prompt}")
-
+        most_recent_version = extracted_code
         version += 1
 
 # Run the main loop
